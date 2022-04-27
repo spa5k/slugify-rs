@@ -9,6 +9,7 @@ The slugify! macro implements a flexible slug generator, allowing for stop words
 - Support for custom slug separator.
 - Stop words filtering.
 - Slug maximum length support.
+- Add randomness to the generated slug to avoid unique constraint from acting
 
 ## Usage
 This crate is on crates.io and can be used by adding slugify to the dependencies in your project’s Cargo.toml
