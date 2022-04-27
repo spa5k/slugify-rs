@@ -50,3 +50,7 @@ assert_eq!(slugify!("the hello world", separator = ".", max_length = 10), "the.h
 assert_eq!(slugify!("the hello world", stop_words = "the", max_length = 5), "hello");
 assert_eq!(slugify!("the hello world", stop_words = "the", separator = "-", max_length = 20), "hello-world");
 ```
+
+# Info
+
+This slug was forked from the original slugify crate by [@mattgathu](https://github.com/mattgathu/slugify)

@@ -2,7 +2,23 @@
 name = "slugify-rs"
 version = "0.0.1"
 edition = "2021"
-
+license = "MIT"
+description = "A rust library to generate slugs from strings"
+rust-version = "1.56"
+categories = [
+  "conversion",
+  "unicode",
+  "slug",
+  "text-processing",
+  "rust-patterns",
+]
+readme = "README.md"
+homepage = "https://github.com/spa5k/slugify-rs"
+repository = "https://github.com/spa5k/slugify-rs"
+keywords = ["slug", "slugify", "slugify-rs", "macro"]
+license-file = "LICENSE"
+documentation = "https://docs.rs/slugify-rs"
+authors = ["Spa5k"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
