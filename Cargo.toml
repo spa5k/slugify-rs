@@ -2,7 +2,6 @@
 name = "slugify-rs"
 version = "0.0.1"
 edition = "2021"
-license = "MIT"
 description = "A rust library to generate slugs from strings"
 rust-version = "1.56"
 categories = [
