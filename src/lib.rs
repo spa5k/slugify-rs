@@ -19,13 +19,12 @@
 //!
 //! ```toml
 //! [dependencies]
-//! slugify-rs = "0.0.1"
+//! slugify-rs = "0.0.2"
 //! ```
 //!
 //!  and this to your crate root:
 //!
 //!```rust,ignore
-//! #[macro_use] extern crate slugify-rs;
 //!use slugify-rs::slugify;
 //!```
 //!
@@ -34,7 +33,6 @@
 //!## Basic slug generation
 //!
 //!```rust
-//! # #[macro_use] extern crate slugify-rs;
 //! # use slugify-rs::slugify;
 //! # fn main() {
 //!assert_eq!(slugify!("hello world"), "hello-world");
@@ -44,8 +42,7 @@
 //!## Using a custom separator
 //!
 //! ```rust
-//! # #[macro_use] extern crate slugify;
-//! # use slugify::slugify;
+//! # use slugify_rs::slugify;
 //! # fn main() {
 //!assert_eq!(slugify!("hello world", separator = "."), "hello.world");
 //!assert_eq!(slugify!("hello world", separator = " "), "hello world");
@@ -56,8 +53,7 @@
 //!## Stop words filtering
 //!
 //!```rust
-//! # #[macro_use] extern crate slugify;
-//! # use slugify::slugify;
+//! # use slugify_rs::slugify;
 //! # fn main() {
 //!assert_eq!(slugify!("the quick brown fox jumps over the lazy dog", stop_words = "the,fox"), "quick-brown-jumps-over-lazy-dog");
 //! # }
@@ -66,8 +62,7 @@
 //!## Maximum length
 //!
 //!```rust
-//! # #[macro_use] extern crate slugify;
-//! # use slugify::slugify;
+//! # use slugify_rs::slugify;
 //! # fn main() {
 //!assert_eq!(slugify!("hello world", max_length = 5), "hello");
 //!assert_eq!(slugify!("the hello world", stop_words = "the", max_length = 5), "hello");
@@ -76,24 +71,23 @@
 //!
 //!## Random values added to string through nanoid
 //! ```rust
-//! # #[macro_use] extern crate slugify;
-//! # use slugify::slugify;
+//! # use slugify_rs::slugify;
+//! # // Default randomness is of 5 characters
 //! # fn main() {
-//! assert_eq!(slugify!("hello world", randomness=true).len(), "hello-world".len()+6);
+//! assert_eq!(slugify!("hello world", randomness=true).len(), "hello-world".len()+5);
 //! # }
 //! ```
 //! ```rust
-//! # #[macro_use] extern crate slugify;
-//! # use slugify::slugify;
+//! # use slugify_rs::slugify;
+//! # // You can also add custom length to the randomness
 //! # fn main() {
-//! assert_eq!(slugify!("hello world", randomness=true,randomness_length=8).len(), "hello-world".len()+9);
+//! assert_eq!(slugify!("hello world", randomness=true,randomness_length=8).len(), "hello-world".len()+8);
 //! # }
 //! ```
 //!## Phonetic Conversion and accented text
 //!
 //!```rust
-//! # #[macro_use] extern crate slugify;
-//! # use slugify::slugify;
+//! # use slugify_rs::slugify;
 //! # fn main() {
 //!assert_eq!(slugify!("影師嗎"), "ying-shi-ma");
 //!assert_eq!(slugify!("Æúű--cool?"), "aeuu-cool");
@@ -108,8 +102,7 @@
 //! order must be adhered.
 //!
 //!```rust
-//! # #[macro_use] extern crate slugify;
-//! # use slugify::slugify;
+//! # use slugify_rs::slugify;
 //! # fn main() {
 //!assert_eq!(slugify!("the hello world", stop_words = "the", separator = "-"), "hello-world");
 //!assert_eq!(slugify!("the hello world", separator = ".", max_length = 10), "the.hello");
@@ -279,6 +272,8 @@ pub fn slugify(
 
     // if randomness is true, generate a nanoid with of size 5 and append it to s
     if randomness {
+        // Decrease one from randomness_length
+        let randomness_length = randomness_length - 1;
         let nanoid = nanoid::nanoid!(randomness_length);
         // change letters to lowercase
         let nanoid = nanoid.to_lowercase();
@@ -309,7 +304,7 @@ mod tests {
         );
         assert_eq!(
             slugify("hello world ", "", "-", None, true, 5).len(),
-            "hello-world".len() + 6
+            "hello-world".len() + 5
         );
         assert_eq!(
             slugify("hello world ", "", "", None, false, 5),
@@ -328,7 +323,7 @@ mod tests {
     fn test_randomness() {
         assert_eq!(
             slugify!("hello world", randomness = true).len(),
-            "hello-world".len() + 6
+            "hello-world".len() + 5
         );
     }
 
@@ -342,7 +337,7 @@ mod tests {
         assert_eq!(slugify!("the 101 dalmatians"), "the-101-dalmatians");
         assert_eq!(
             slugify!("the 101 dalmatians", randomness = true).len(),
-            "the-101-dalmatians".len() + 6
+            "the-101-dalmatians".len() + 5
         );
     }
 
@@ -373,7 +368,7 @@ mod tests {
         assert_eq!(slugify!("hello world", stop_words = "world"), "hello");
         assert_eq!(
             slugify!("hello world", stop_words = "world", randomness = true).len(),
-            "hello".len() + 6
+            "hello".len() + 5
         );
     }
 
@@ -442,7 +437,7 @@ mod tests {
                 8
             )
             .len(),
-            "quick brown fox jumps over lazy dog".len() + 9
+            "quick brown fox jumps over lazy dog".len() + 8
         );
         assert_eq!(
             slugify!(
@@ -461,7 +456,7 @@ mod tests {
                 randomness = true
             )
             .len(),
-            "quick brown fox jumps over lazy dog".len() + 6
+            "quick brown fox jumps over lazy dog".len() + 5
         );
 
         assert_eq!(
@@ -470,10 +465,10 @@ mod tests {
                 stop_words = "the",
                 separator = " ",
                 randomness = true,
-                randomness_length = 8
+                randomness_length = 10
             )
             .len(),
-            "quick brown fox jumps over lazy dog".len() + 9
+            "quick brown fox jumps over lazy dog".len() + 10
         );
     }
 
@@ -490,7 +485,7 @@ mod tests {
         assert_eq!(slugify!("hello world", separator = "_"), "hello_world");
         assert_eq!(
             slugify!("hello world-", separator = "_", randomness = true).len(),
-            "hello_world".len() + 6
+            "hello_world".len() + 5
         );
     }
 
