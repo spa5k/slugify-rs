@@ -15,7 +15,7 @@ The slugify! macro implements a flexible slug generator, allowing for stop words
 This crate is on crates.io and can be used by adding slugify to the dependencies in your project’s Cargo.toml
 ```toml
 [dependencies]
-slugify-rs = "0.0.1"
+slugify-rs = "0.0.3"
 ```
 Examples
 Basic slug generation
@@ -35,8 +35,9 @@ assert_eq!(slugify!("hello world", max_length = 5), "hello");
 assert_eq!(slugify!("the hello world", stop_words = "the", max_length = 5), "hello");
 
 // Random values added to string through nanoid
-assert_eq!(slugify!("hello world", randomness=true).len(), "hello-world".len()+6);
-assert_eq!(slugify!("hello world", randomness=true,randomness_length=8).len(), "hello-world".len()+9);
+// Default randomness string length is 5.
+assert_eq!(slugify!("hello world", randomness=true).len(), "hello-world".len()+5);
+assert_eq!(slugify!("hello world", randomness=true,randomness_length=8).len(), "hello-world".len()+8);
 
 // Phonetic Conversion and accented text
 assert_eq!(slugify!("影師嗎"), "ying-shi-ma");

@@ -281,7 +281,6 @@ pub fn slugify(
         s.push_str(&sep);
         s.push_str(&nanoid);
     }
-    println!("{}", s);
     s
 }
 

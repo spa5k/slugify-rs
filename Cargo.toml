@@ -1,6 +1,6 @@
 [package]
 name = "slugify-rs"
-version = "0.0.2"
+version = "0.0.3"
 edition = "2021"
 description = "A rust library to generate slugs from strings"
 rust-version = "1.56"
