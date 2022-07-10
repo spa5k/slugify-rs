@@ -33,7 +33,7 @@
 //!## Basic slug generation
 //!
 //!```rust
-//! # use slugify-rs::slugify;
+//! # use slugify_rs::slugify;
 //! # fn main() {
 //!assert_eq!(slugify!("hello world"), "hello-world");
 //! # }
