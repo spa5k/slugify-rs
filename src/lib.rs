@@ -89,9 +89,9 @@
 //!```rust
 //! # use slugify_rs::{slugify, Case};
 //! # fn main() {
-//!assert_eq!(slugify!("影師嗎"), "Ying-Shi-Ma");
+//!assert_eq!(slugify!("影師嗎"), "ying-shi-ma");
 //!assert_eq!(slugify!("Æúű--cool?", transform = Case::Lower), "aeuu-cool");
-//!assert_eq!(slugify!("Nín hǎo. Wǒ shì zhōng guó rén"), "Nin-hao-Wo-shi-zhong-guo-ren");
+//!assert_eq!(slugify!("Nín hǎo. Wǒ shì zhōng guó rén", transform = Case::Same), "Nin-hao-Wo-shi-zhong-guo-ren");
 //! # }
 //!```
 //!## Easily convert text between different letter cases
@@ -99,7 +99,8 @@
 //!```rust
 //! # use slugify_rs::{slugify, Case};
 //! # fn main() {
-//!assert_eq!(slugify!("Hello World"), "Hello-World");
+//!assert_eq!(slugify!("Hello World"), "hello-world");
+//!assert_eq!(slugify!("Hello World", transform = Case::Same), "Hello-World");
 //!assert_eq!(slugify!("hello world", transform = Case::Upper), "HELLO-WORLD");
 //!assert_eq!(slugify!("HeLlO wOrLd", transform = Case::Lower), "hello-world");
 //! # }
@@ -126,6 +127,7 @@ use deunicode::deunicode;
 pub enum Case {
     Lower,
     Upper,
+    Same,
 }
 
 #[macro_export]
@@ -188,7 +190,7 @@ macro_rules! slugify {
     }};
 
     ($text:expr, stop_words=$stopwords:expr, separator=$sep:expr,randomness=$bool:expr,randomness_length=$usize:expr $(, transform=$case:expr )?) => {{
-        let mut case = None;
+        let case = None;
         $ ( case = Some($case); )?
         slugify($text, $stopwords, $sep, None, $bool, $usize, case)
     }};
@@ -202,7 +204,7 @@ macro_rules! slugify {
     }};
 
     ($text:expr, stop_words=$stopwords:expr, max_length=$len:expr,randomness=$bool:expr,randomness_length=$usize:expr $(, transform=$case:expr )?) => {{
-        let mut case = None;
+        let case = None;
         $ ( case = Some($case); )?
         slugify($text, $stopwords, "-", Some($len), $bool, $usize, case)
     }};
@@ -222,7 +224,7 @@ macro_rules! slugify {
     }};
 
     ($text:expr, stop_words=$stopwords:expr, separator=$sep:expr, max_length=$len:expr $(, transform=$case:expr )?) => {{
-        let mut case = None;
+        let case = None;
         $ ( case = Some($case); )?
         slugify($text, $stopwords, $sep, Some($len), false, 5, case)
     }};
@@ -332,12 +334,9 @@ pub fn slugify(
 
     let mut s = String::from_utf8(slug).unwrap();
 
-    match max_length {
-        Some(x) => {
-            s.truncate(x);
-            s = s.trim_end_matches(char_vec[0]).to_string();
-        }
-        None => {}
+    if let Some(x) = max_length {
+        s.truncate(x);
+        s = s.trim_end_matches(char_vec[0]).to_string();
     }
 
     // if randomness is true, generate a nanoid with of size 5 and append it to s
@@ -355,7 +354,8 @@ pub fn slugify(
     match transform {
         Some(Case::Lower) => s.to_lowercase(),
         Some(Case::Upper) => s.to_uppercase(),
-        _ => s,
+        Some(Case::Same) => s,
+        _ => s.to_lowercase(),
     }
 }
 
@@ -386,6 +386,10 @@ mod tests {
             "HELLO-WORLD"
         );
         assert_eq!(
+            slugify("Hello World ", "", "-", None, false, 5, Some(Case::Same)),
+            "Hello-World"
+        );
+        assert_eq!(
             slugify("hello world ", "", "", None, false, 5, None),
             "helloworld"
         );
@@ -413,7 +417,7 @@ mod tests {
 
     #[test]
     fn test_contains_numbers() {
-        assert_eq!(slugify!("the 101 dalmatians"), "the-101-dalmatians");
+        assert_eq!(slugify!("the 101 Dalmatians"), "the-101-dalmatians");
         assert_eq!(
             slugify!("the 101 dalmatians", randomness = true).len(),
             "the-101-dalmatians".len() + 5
@@ -561,6 +565,7 @@ mod tests {
             slugify("hello world", "", ".", None, false, 5, None),
             "hello.world"
         );
+
         assert_eq!(
             slugify("hello world", "", "_", None, false, 5, None),
             "hello_world"
@@ -575,8 +580,16 @@ mod tests {
     #[test]
     fn test_phonetic_conversion() {
         assert_eq!(
-            slugify("影師嗎", "", "-", None, false, 5, None),
+            slugify("影師嗎", "", "-", None, false, 5, Some(Case::Same)),
             "Ying-Shi-Ma"
+        );
+        assert_eq!(
+            slugify("影師嗎", "", "-", None, false, 5, Some(Case::Lower)),
+            "ying-shi-ma"
+        );
+        assert_eq!(
+            slugify("影師嗎", "", "-", None, false, 5, None),
+            "ying-shi-ma"
         );
     }
 
@@ -598,13 +611,37 @@ mod tests {
             ),
             "nin-hao-wo-shi-zhong-guo-ren"
         );
+        assert_eq!(
+            slugify(
+                "Nín hǎo. Wǒ shì zhōng guó rén",
+                "",
+                "-",
+                None,
+                false,
+                5,
+                None
+            ),
+            "nin-hao-wo-shi-zhong-guo-ren"
+        );
+        assert_eq!(
+            slugify(
+                "Nín hǎo. Wǒ shì zhōng guó rén",
+                "",
+                "-",
+                None,
+                false,
+                5,
+                Some(Case::Same)
+            ),
+            "Nin-hao-Wo-shi-zhong-guo-ren"
+        );
     }
 
     #[test]
     fn test_convert_case() {
         assert_eq!(
             slugify("Hello World", "", "-", None, false, 5, None),
-            "Hello-World",
+            "hello-world",
         );
         assert_eq!(
             slugify!("Hello World", transform = Case::Lower),
@@ -613,6 +650,10 @@ mod tests {
         assert_eq!(
             slugify!("hello world", transform = Case::Upper),
             "HELLO-WORLD"
+        );
+        assert_eq!(
+            slugify!("Hello World", transform = Case::Same),
+            "Hello-World"
         );
     }
 
@@ -623,19 +664,19 @@ mod tests {
 
     #[test]
     fn test_cyrillic_text() {
-        assert_eq!(slugify!("Компьютер"), "Komp-iuter");
+        assert_eq!(slugify!("Компьютер"), "komp-iuter");
     }
 
     #[test]
     fn test_macro() {
-        assert_eq!(slugify!("Компьютер"), "Komp-iuter");
+        assert_eq!(slugify!("Компьютер"), "komp-iuter");
         assert_eq!(slugify!("hello world", separator = "-"), "hello-world");
         assert_eq!(slugify!("hello world", separator = " "), "hello world");
         assert_eq!(slugify!("hello world", max_length = 5), "hello");
         assert_eq!(slugify!("hello world", max_length = 6), "hello");
         assert_eq!(
             slugify!("Hello world", separator = " ", max_length = 8),
-            "Hello wo"
+            "hello wo"
         );
         assert_eq!(
             slugify!("hello world", separator = "x", max_length = 8),
@@ -649,6 +690,15 @@ mod tests {
                 transform = Case::Upper
             ),
             "HELLO-WORLD"
+        );
+        assert_eq!(
+            slugify!(
+                "The Great Khan",
+                stop_words = "the",
+                separator = "-",
+                transform = Case::Lower
+            ),
+            "great-khan"
         );
         assert_eq!(
             slugify!("the hello world", stop_words = "the", max_length = 5),
