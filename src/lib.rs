@@ -122,6 +122,8 @@
 //! # }
 //!```
 //!
+mod builder;
+
 use deunicode::deunicode;
 
 pub enum Case {
