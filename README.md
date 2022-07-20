@@ -1,5 +1,5 @@
 # Slugify-rs
-A utility macro for flexible slug genereation that handles unicode.
+A utility macro for flexible slug generation that handles unicode.
 
 The slugify! macro implements a flexible slug generator, allowing for stop words, custom separator and maximum length options. The macro provides both a simple interface with sane default parameters but also allows the parameters to be overriden when needed.
 
@@ -10,6 +10,7 @@ The slugify! macro implements a flexible slug generator, allowing for stop words
 - Stop words filtering.
 - Slug maximum length support.
 - Add randomness to the generated slug to avoid unique constraint from acting
+- Easily convert text between different letter cases
 
 ## Usage
 This crate is on crates.io and can be used by adding slugify to the dependencies in your project’s Cargo.toml
@@ -20,7 +21,9 @@ slugify-rs = "0.0.3"
 Examples
 Basic slug generation
 ```rust
-assert_eq!(slugify!("hello world"), "hello-world");
+use slugify_rs::{slugify, Case};
+
+assert_eq!(slugify!("Hello World"), "Hello-World");
 
 // Using a custom separator
 assert_eq!(slugify!("hello world", separator = "."), "hello.world");
@@ -43,6 +46,12 @@ assert_eq!(slugify!("hello world", randomness=true,randomness_length=8).len(), "
 assert_eq!(slugify!("影師嗎"), "ying-shi-ma");
 assert_eq!(slugify!("Æúű--cool?"), "aeuu-cool");
 assert_eq!(slugify!("Nín hǎo. Wǒ shì zhōng guó rén"), "nin-hao-wo-shi-zhong-guo-ren");
+
+// Easily convert text between different letter cases
+
+assert_eq!(slugify!("Hello World"), "Hello-World");
+assert_eq!(slugify!("hello world", transform = Case::Upper), "HELLO-WORLD");
+assert_eq!(slugify!("HeLlO wOrLd", transform = Case::Lower), "hello-world");
 
 // Passing multiple optional parameters.
 // NOTE: the order of optional parameters matters: stop_words, separator and then max_length. All of them are optional, however when specifying more than one optional parameter, this order must be adhered.
